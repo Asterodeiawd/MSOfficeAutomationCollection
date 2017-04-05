@@ -8,21 +8,21 @@ Sub Main()
     xlSheetCols = ActiveSheet.UsedRange.Columns.Count
     xlSheetRows = ActiveSheet.UsedRange.Rows.Count
 
-    ' ²»ÒªÔÚÎ´ÌîĞ´Êı¾İÊ±Ê¹ÓÃ
+    ' ä¸è¦åœ¨æœªå¡«å†™æ•°æ®æ—¶ä½¿ç”¨
     If Cells(2, "A") = "" Then
-        msg = MsgBox("ÇëÊäÈëÊı¾İºóÔÙÊ¹ÓÃ×Ô¶¯Éú³É¹¦ÄÜ", vbOKOnly, "×¢Òâ")
+        msg = MsgBox("è¯·è¾“å…¥æ•°æ®åå†ä½¿ç”¨è‡ªåŠ¨ç”ŸæˆåŠŸèƒ½", vbOKOnly, "æ³¨æ„")
         Exit Sub
     End If
 
     Dim strFolderName, strFolderPath As String
-    strFolderName = Format(Now(), "¹¤×÷Æ±yyyy-mm-dd")
+    strFolderName = Format(Now(), "å·¥ä½œç¥¨yyyy-mm-dd")
     strFolderRootPath = "D:\"
     strFilePath = strFolderRootPath & strFolderName & "\"
 
     If Dir(strFolderRootPath & strFolderName, vbDirectory) <> "" Then
-        msg = MsgBox("Ä¿±êÎÄ¼ş¼ĞÒÑ´æÔÚ£¬ÊÇ·ñÉ¾³ı£¿", vbYesNo, "×¢Òâ")
+        msg = MsgBox("ç›®æ ‡æ–‡ä»¶å¤¹å·²å­˜åœ¨ï¼Œæ˜¯å¦åˆ é™¤ï¼Ÿ", vbYesNo, "æ³¨æ„")
         If msg = vbNo Then
-            MsgBox "ÒÑÖÕÖ¹£¬ÈçĞè¼ÌĞøÊ¹ÓÃ£¬ÇëÉ¾³ı""" & strFolderName & """ÎÄ¼ş¼ĞºóÖØĞÂÔËĞĞ", vbOKOnly, "×¢Òâ"
+            MsgBox "å·²ç»ˆæ­¢ï¼Œå¦‚éœ€ç»§ç»­ä½¿ç”¨ï¼Œè¯·åˆ é™¤""" & strFolderName & """æ–‡ä»¶å¤¹åé‡æ–°è¿è¡Œ", vbOKOnly, "æ³¨æ„"
             Exit Sub
         Else
             DeleteFolder(strFolderRootPath & strFolderName)
@@ -32,14 +32,14 @@ Sub Main()
     MkDir strFolderRootPath & strFolderName
     
     Set wordApp = CreateObject("Word.Application")
-    ' Word³ÌĞòµÄ¿É¼ûĞÔ£¬²»ĞèÒªÊ±¸ÄÎªFalse
+    ' Wordç¨‹åºçš„å¯è§æ€§ï¼Œä¸éœ€è¦æ—¶æ”¹ä¸ºFalse
     wordApp.Visible = False
 
     Dim wdDocs As Documents
     Dim wdDoc As Document
 
     For i = 2 To xlSheetRows
-        Application.StatusBar = "ÕıÔÚ´¦ÀíµÚ" & i - 1 & "Ìõ¼ÇÂ¼, ¹²" & xlSheetRows - 1 & "Ìõ¼ÇÂ¼"
+        Application.StatusBar = "æ­£åœ¨å¤„ç†ç¬¬" & i - 1 & "æ¡è®°å½•, å…±" & xlSheetRows - 1 & "æ¡è®°å½•"
 
         strTicketStationName = Cells(i, "B")
         strTicketId = Cells(i, "C")
@@ -48,24 +48,24 @@ Sub Main()
         strFileName = Cells(i, "F")
         
         ' TODO: change here!
-        Set wdDoc = wordApp.Documents.Add(Template:="C:\Users\Asterodeia\Desktop\¹¬÷ì\±äµçµÚ¶şÖÖ¹¤×÷Æ±Ä£°å2.dotx", NewTemplate:=False, DocumentType:=0)
+        Set wdDoc = wordApp.Documents.Add(Template:="C:\Users\Asterodeia\Desktop\å˜ç”µç¬¬äºŒç§å·¥ä½œç¥¨æ¨¡æ¿2.dotx", NewTemplate:=False, DocumentType:=0)
         
         wdDoc.Activate
         With wordApp.Selection
-            ' ÒÆ¶¯ÖÁÎÄµµÆğÊ¼
+            ' ç§»åŠ¨è‡³æ–‡æ¡£èµ·å§‹
             .HomeKey Unit:=wdStory
-            ' ¹¤×÷Æ±ĞòºÅ
+            ' å·¥ä½œç¥¨åºå·
             .NextField.Select
             .TypeText Text:=strTicketId
-            ' ¹¤×÷ÈÎÎñ£ºÅäµçÕ¾Ãû³Æ
+            ' å·¥ä½œä»»åŠ¡ï¼šé…ç”µç«™åç§°
             .NextField.Select
             .TypeText Text:=strTicketStationName
-            ' É¾³ı½áÎ²¶àÓàÏÂ»®Ïß
+            ' åˆ é™¤ç»“å°¾å¤šä½™ä¸‹åˆ’çº¿
             .EndKey Unit:=wdLine
             .MoveLeft Unit:=wdCharacter, Count:=(Len(strTicketStationName) * 2), Extend:=wdExtend
             .TypeBackspace
 
-            ' ¼Æ»®¹¤×÷Ê±¼ä£ºÆğÊ¼
+            ' è®¡åˆ’å·¥ä½œæ—¶é—´ï¼šèµ·å§‹
             .NextField.Select
             .TypeText Text:=Format(Year(strTicketStartTime), "0000")
             .NextField.Select
@@ -77,7 +77,7 @@ Sub Main()
             .NextField.Select
             .TypeText Text:=Format(Minute(strTicketStartTime), "00")
 
-            ' ¼Æ»®¹¤×÷Ê±¼ä£º½áÊø
+            ' è®¡åˆ’å·¥ä½œæ—¶é—´ï¼šç»“æŸ
             .NextField.Select
             .TypeText Text:=Format(Year(strTicketStopTime), "0000")
             .NextField.Select
@@ -105,7 +105,7 @@ Sub Main()
     Next
 
     wordApp.Quit
-    Application.StatusBar = "Done£¡"
+    Application.StatusBar = "Doneï¼"
     Application.Wait(Now() + TimeValue("0:0:3"))
     Application.StatusBar = ""
 
