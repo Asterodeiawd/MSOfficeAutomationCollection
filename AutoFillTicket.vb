@@ -1,3 +1,5 @@
+Option Explicit
+
 Sub Main()
     Dim wordApp As Object
     Worksheets("Data").Activate
@@ -5,67 +7,88 @@ Sub Main()
     Dim xlSheetCols
     Dim xlSheetRows
 
-    xlSheetCols = ActiveSheet.UsedRange.Columns.Count
+'    xlSheetCols = ActiveSheet.UsedRange.Columns.Count
     xlSheetRows = ActiveSheet.UsedRange.Rows.Count
-
-    ' ä¸è¦åœ¨æœªå¡«å†™æ•°æ®æ—¶ä½¿ç”¨
+    
+    ' ²»ÒªÔÚÎ´ÌîĞ´Êı¾İÊ±Ê¹ÓÃ
+    Dim msg As Integer
     If Cells(2, "A") = "" Then
-        msg = MsgBox("è¯·è¾“å…¥æ•°æ®åå†ä½¿ç”¨è‡ªåŠ¨ç”ŸæˆåŠŸèƒ½", vbOKOnly, "æ³¨æ„")
-        Exit Sub
+       msg = MsgBox("ÇëÊäÈëÊı¾İºóÔÙÊ¹ÓÃ×Ô¶¯Éú³É¹¦ÄÜ", vbOKOnly, "×¢Òâ")
+       Exit Sub
     End If
+    
+    ' ¶ÁÈ¡Ä¿Â¼²ÎÊı
+    Dim strFolderName, strFolderPath, strRequiredFolder, strFolderRootPath, strTemplatePath As String
+    
+    strFolderRootPath = Worksheets("Params").Range("B1").Value
+    strFolderName = Worksheets("Params").Range("B2").Value
+    
+    strRequiredFolder = Worksheets("Params").Range("B3").Value
+    If Application.Version <= 14 Then
+        If strRequiredFolder <> "" Then
+            strTemplatePath = strRequiredFolder
+        Else
+            strTemplatePath = Application.TemplatesPath
+        End If
+    Else
+        strTemplatePath = Worksheets("Params").Range("B3").Value
+    End If
+    
+    Dim strFilePath As String
+    strFilePath = PathJoin(strFolderRootPath, strFolderName)
 
-    Dim strFolderName, strFolderPath As String
-    strFolderName = Format(Now(), "å·¥ä½œç¥¨yyyy-mm-dd")
-    strFolderRootPath = "D:\"
-    strFilePath = strFolderRootPath & strFolderName & "\"
-
-    If Dir(strFolderRootPath & strFolderName, vbDirectory) <> "" Then
-        msg = MsgBox("ç›®æ ‡æ–‡ä»¶å¤¹å·²å­˜åœ¨ï¼Œæ˜¯å¦åˆ é™¤ï¼Ÿ", vbYesNo, "æ³¨æ„")
+    If dir(strFilePath, vbDirectory) <> "" Then
+        
+        msg = MsgBox("Ä¿±êÎÄ¼ş¼ĞÒÑ´æÔÚ£¬ÊÇ·ñÉ¾³ı²¢¼ÌĞø£¿", vbYesNo, "×¢Òâ")
         If msg = vbNo Then
-            MsgBox "å·²ç»ˆæ­¢ï¼Œå¦‚éœ€ç»§ç»­ä½¿ç”¨ï¼Œè¯·åˆ é™¤""" & strFolderName & """æ–‡ä»¶å¤¹åé‡æ–°è¿è¡Œ", vbOKOnly, "æ³¨æ„"
+            MsgBox "ÒÑÖÕÖ¹£¬ÈçĞè¼ÌĞøÊ¹ÓÃ£¬ÇëÉ¾³ı""" & strFolderName & """ÎÄ¼ş¼ĞºóÖØĞÂÔËĞĞ", vbOKOnly, "×¢Òâ"
             Exit Sub
         Else
-            DeleteFolder(strFolderRootPath & strFolderName)
+            DeleteFolder (strFilePath)
         End If
     End If
-
-    MkDir strFolderRootPath & strFolderName
+    
+    MakeDir strFilePath
     
     Set wordApp = CreateObject("Word.Application")
-    ' Wordç¨‹åºçš„å¯è§æ€§ï¼Œä¸éœ€è¦æ—¶æ”¹ä¸ºFalse
+    ' Word³ÌĞòµÄ¿É¼ûĞÔ£¬²»ĞèÒªÊ±¸ÄÎªFalse
     wordApp.Visible = False
-
+    
     Dim wdDocs As Documents
     Dim wdDoc As Document
-
+    
+    Dim i As Integer
+    Dim strTicketStationName, strTicketId, strTicketStartTime, strTicketStopTime, strFileName As String
     For i = 2 To xlSheetRows
-        Application.StatusBar = "æ­£åœ¨å¤„ç†ç¬¬" & i - 1 & "æ¡è®°å½•, å…±" & xlSheetRows - 1 & "æ¡è®°å½•"
-
-        strTicketStationName = Cells(i, "B")
-        strTicketId = Cells(i, "C")
-        strTicketStartTime = Cells(i, "D")
-        strTicketStopTime = Cells(i, "E")
-        strFileName = Cells(i, "F")
+        Application.StatusBar = "ÕıÔÚ´¦ÀíµÚ" & i - 1 & "Ìõ¼ÇÂ¼, ¹²" & xlSheetRows - 1 & "Ìõ¼ÇÂ¼"
+        
+        strTicketStationName = Cells(i, "B").Value
+        strTicketId = Cells(i, "C").Value
+        strTicketStartTime = Cells(i, "D").Value
+        strTicketStopTime = Cells(i, "E").Value
+        strFileName = Cells(i, "F").Value
         
         ' TODO: change here!
-        Set wdDoc = wordApp.Documents.Add(Template:="C:\Users\Asterodeia\Desktop\å˜ç”µç¬¬äºŒç§å·¥ä½œç¥¨æ¨¡æ¿2.dotx", NewTemplate:=False, DocumentType:=0)
+        Set wdDoc = wordApp.Documents.Add(Template:=PathJoin(strTemplatePath, "±äµçµÚ¶şÖÖ¹¤×÷Æ±Ä£°å.dotx"), _
+            NewTemplate:=False, DocumentType:=0)
         
         wdDoc.Activate
         With wordApp.Selection
-            ' ç§»åŠ¨è‡³æ–‡æ¡£èµ·å§‹
+            ' ÒÆ¶¯ÖÁÎÄµµÆğÊ¼
             .HomeKey Unit:=wdStory
-            ' å·¥ä½œç¥¨åºå·
+            ' ¹¤×÷Æ±ĞòºÅ
             .NextField.Select
-            .TypeText Text:=strTicketId
-            ' å·¥ä½œä»»åŠ¡ï¼šé…ç”µç«™åç§°
+            .TypeText Text:=strFileName
+            ' ¹¤×÷ÈÎÎñ£ºÅäµçÕ¾Ãû³Æ
             .NextField.Select
             .TypeText Text:=strTicketStationName
-            ' åˆ é™¤ç»“å°¾å¤šä½™ä¸‹åˆ’çº¿
+            
+            ' É¾³ı½áÎ²¶àÓàÏÂ»®Ïß, ÖĞÎÄ×Ö·û¿í¶ÈÎª2£¬Ó¢ÎÄ×Ö·û¿í¶ÈÎª1
             .EndKey Unit:=wdLine
-            .MoveLeft Unit:=wdCharacter, Count:=(Len(strTicketStationName) * 2), Extend:=wdExtend
+            .MoveLeft Unit:=1, Count:=(LenB(StrConv(strTicketStationName, vbFromUnicode))), Extend:=1
             .TypeBackspace
-
-            ' è®¡åˆ’å·¥ä½œæ—¶é—´ï¼šèµ·å§‹
+            
+            ' ¼Æ»®¹¤×÷Ê±¼ä£ºÆğÊ¼
             .NextField.Select
             .TypeText Text:=Format(Year(strTicketStartTime), "0000")
             .NextField.Select
@@ -77,7 +100,7 @@ Sub Main()
             .NextField.Select
             .TypeText Text:=Format(Minute(strTicketStartTime), "00")
 
-            ' è®¡åˆ’å·¥ä½œæ—¶é—´ï¼šç»“æŸ
+            ' ¼Æ»®¹¤×÷Ê±¼ä£º½áÊø
             .NextField.Select
             .TypeText Text:=Format(Year(strTicketStopTime), "0000")
             .NextField.Select
@@ -90,29 +113,65 @@ Sub Main()
             .TypeText Text:=Format(Minute(strTicketStopTime), "00")
         End With
 
-        wdDoc.SaveAs2 Filename:=strFilePath & strFileName, FileFormat:=
+        wdDoc.SaveAs Filename:=PathJoin(strFilePath, strFileName), FileFormat:= _
             wdFormatXMLDocument, LockComments:=False, Password:="", AddToRecentFiles _
-            :=True, WritePassword:="", ReadOnlyRecommended:=False, EmbedTrueTypeFonts _
-            :=False, SaveNativePictureFormat:=False, SaveFormsData:=False,
-            SaveAsAOCELetter:=False, CompatibilityMode:=15
-
+            :=False, WritePassword:="", ReadOnlyRecommended:=False, EmbedTrueTypeFonts _
+            :=False, SaveNativePictureFormat:=False, SaveFormsData:=False, _
+            SaveAsAOCELetter:=False
+        
         If wordApp.Visible = True Then
-            Application.Wait(Now() + TimeValue("0:0:3"))
+            Application.Wait (Now() + TimeValue("0:0:3"))
         End If
 
         wdDoc.Close SaveChanges:=True
 
     Next
-
+    
     wordApp.Quit
-    Application.StatusBar = "Doneï¼"
-    Application.Wait(Now() + TimeValue("0:0:3"))
+    Application.StatusBar = "Done£¡"
+    Application.Wait (Now() + TimeValue("0:0:3"))
     Application.StatusBar = ""
 
 End Sub
 
-Sub DeleteFolder(ByVal path As String)
+Private Function PathJoin(ByVal rootPath As String, ByVal dir As String, Optional ByVal separator As String = "\")
+
+    If Right(rootPath, 1) <> separator Then
+        PathJoin = rootPath & separator & dir
+    Else
+        PathJoin = rootPath & dir
+    End If
+    
+End Function
+
+Private Sub MakeDir(ByVal path As String)
+    ' this needs Microsoft Scripting Runtime
+    Dim fso As FileSystemObject
     Set fso = CreateObject("Scripting.FileSystemObject")
-    fso.DeleteFolder(path)
+
+    MakeDirImpl path, fso
+
+    Set fso = Nothing
+End Sub
+
+Private Function MakeDirImpl(ByVal path As String, ByRef fso As Object) As Boolean
+  
+    Dim parentFolder As String
+    parentFolder = fso.GetParentFolderName(path)
+    
+    While Not fso.FolderExists(parentFolder)
+        MakeDirImpl parentFolder, fso
+    Wend
+    
+    fso.CreateFolder (path)
+    MakeDirImpl = True
+    
+End Function
+
+Sub DeleteFolder(ByVal path As String)
+    Dim fso As FileSystemObject
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    fso.DeleteFolder (path)
+
     Set fso = Nothing
 End Sub
