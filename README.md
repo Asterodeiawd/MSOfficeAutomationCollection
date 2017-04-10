@@ -1,2 +1,2 @@
-# MSOfficeVbaCollection
-This repo contains the vba codes
+# MSOfficeAutomationCollection
+This repo contains program to automate daily works
